@@ -1,27 +1,61 @@
-# ╔═════════════════════════════════════╦════════════════════╗
-# ║ Title: Show Graphic for Gauge       ║  Version: 1.00     ║
-# ║ Author: Roninator2                  ║                    ║
-# ╠═════════════════════════════════════╬════════════════════╣
-# ║ Function:                           ║   Date Created     ║
-# ║                                     ╠════════════════════╣
-# ║   Display graphic file for gauge    ║    14 Feb 2022     ║
-# ╚═════════════════════════════════════╩════════════════════╝
-# ╔══════════════════════════════════════════════════════════╗
-# ║ Specify the X & Y and the file name in System folder     ║
-# ╚══════════════════════════════════════════════════════════╝
-# ╔══════════════════════════════════════════════════════════╗
-# ║ Terms of use:                                            ║
-# ║ Free for all uses in RPG Maker except nudity             ║
-# ╚══════════════════════════════════════════════════════════╝
- 
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Yami Order Gauge Image - sidebar       ║  Version: 1.01     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║ Draw a background image for gauge             ║    29 Dec 2021     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: Yanfly Battle Engine                                     ║
+# ║           Yami Order Battlers                                      ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║     Order Battlers - Show sidebar image                            ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║   Place below Order Battlers                                       ║
+# ║   Fixes the issue that the gauge doesn't update when an            ║
+# ║   enemy is revealed, transformed, or revived                       ║
+# ║   Configure settings below                                         ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 28 Dec 2022 - Script finished                               ║
+# ║ 1.01 - 29 Dec 2022 - fix bug                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
 module R2_SideBar_Gauge_Image
   POS_X = 0
-  POS_Y = 50
-  Graphic = "Sidebar"
+  POS_Y = 65
+  Graphic = "Order Battler Sidebar"
 end
- 
+
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║                      End of editable region                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
 class Scene_Battle < Scene_Base
- 
+
   alias r2_order_gauge_create_graphic create_all_windows
   def create_all_windows
     r2_order_gauge_create_graphic
@@ -30,19 +64,25 @@ class Scene_Battle < Scene_Base
     @sidebar_gauge.opacity = 0
     @sidebar_gauge.x = R2_SideBar_Gauge_Image::POS_X
     @sidebar_gauge.y = R2_SideBar_Gauge_Image::POS_Y
-    @sidebar_gauge.z = 100
+    @sidebar_gauge.z = 50
     if $game_switches[YSA::ORDER_GAUGE::SHOW_SWITCH] == true
       @sidebar_gauge.opacity = 255
+    else
+      @sidebar_gauge.opacity = 0
     end
   end
   alias r2_order_gauge_graphics_update update
   def update
-    r2_order_gauge_graphics_update
     if $game_switches[YSA::ORDER_GAUGE::SHOW_SWITCH] == true
-      @sidebar_gauge.opacity = 255 
+      if $game_party.all_dead? || $game_troop.all_dead?
+				@sidebar_gauge.opacity = 0
+			else
+				@sidebar_gauge.opacity = 255
+			end
     else
       @sidebar_gauge.opacity = 0
     end
+    r2_order_gauge_graphics_update
   end
   alias r2_order_gauge_dispose_all dispose_spriteset
   def dispose_spriteset

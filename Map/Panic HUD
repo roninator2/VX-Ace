@@ -1,0 +1,229 @@
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Panic Hud                              ║  Version: 1.07     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║ Draw A Panic Number on Map                    ║    29 Dec 2021     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: nil                                                      ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║       Show a Window for Panic Meter                                ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║   A script to display a number to indicate danager                 ║
+# ║   Designed for a horror/ thriller type game                        ║
+# ║   The number is whatever the value of the variable is              ║
+# ║   Set the values below to your preference                          ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 29 Dec 2021 - Script finished                               ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+module R2_Panic_Number_Colour
+ 
+  Panic_Var = 23              # variable used to adjust the panic
+  Colours = [11, 17, 20, 18]  # Windowskin colours
+  # Green, Yellow, Orange, Red
+  Number_Hud_X = 480          # X location
+  Number_Hud_Y = 10           # Y location
+  Number_Hud_Width = 60       # Number width
+  Number_Hud_Height = 50      # Number height
+  Window_Graphic = "Window"   # Set the window graphics
+  Window_Opacity = 255        # Set the window opacity
+  Window_Back_Opacity = 255   # Set the back opacity
+  Warning_Sound = "Buzzer1"   # Sound to play at warning point
+  Warning_Mark = 95           # Point of when sound will play
+  Image = "Red-Overlay"            # image to display when number is high
+  Image_OI = [0, 80, 160, 240]  # Opacity Increment
+  Font = "Arial"              # Set the font
+  Font_Size = 24              # Set the font size
+  Switch = 5                  # Switch to turn number off
+  Seconds = 3                 # time to wait between sounds
+ 
+end
+
+class Panic_Window < Window_Base
+ 
+  def initialize
+    x = R2_Panic_Number_Colour::Number_Hud_X
+    y = R2_Panic_Number_Colour::Number_Hud_Y
+    w = R2_Panic_Number_Colour::Number_Hud_Width
+    h = R2_Panic_Number_Colour::Number_Hud_Height
+    super(x,y,w,h)
+    self.windowskin = Cache.system(R2_Panic_Number_Colour::Window_Graphic)
+    self.opacity = R2_Panic_Number_Colour::Window_Opacity
+    self.back_opacity = R2_Panic_Number_Colour::Window_Back_Opacity
+    self.contents_opacity = 255
+    @current_number = $game_variables[R2_Panic_Number_Colour::Panic_Var]
+    @panic_image = nil
+    self.windowskin = Cache.system(R2_Panic_Number_Colour::Window_Graphic)
+    @sndplayed = true
+    @time = 0
+    @last_time = 0
+    @image_shown = false
+    refresh
+  end
+ 
+  def panic_data
+    @current_number = $game_variables[R2_Panic_Number_Colour::Panic_Var]
+    @current_number = 100 if $game_variables[R2_Panic_Number_Colour::Panic_Var] >= 100
+    @current_number = 0 if $game_variables[R2_Panic_Number_Colour::Panic_Var] <= 0
+    draw_panic_hud(0, 0)
+    if @last_time < @time
+      @sndplayed = false
+    end
+    if @current_number >= R2_Panic_Number_Colour::Warning_Mark && @sndplayed == false
+      snd = RPG::SE.new(R2_Panic_Number_Colour::Warning_Sound, 100, 100)
+      snd.play if @sndplayed == false
+      @last_time = @time if @sndplayed == false
+      @sndplayed = true
+    end
+  end
+ 
+  def show_panic(ind)
+    @panic_image.dispose if !@panic_image.nil?
+    return if @image_shown == false
+    @panic_image = Sprite.new
+    @panic_image.bitmap = Cache.picture(R2_Panic_Number_Colour::Image)
+    @panic_image.opacity = R2_Panic_Number_Colour::Image_OI[ind]
+  end
+ 
+  def draw_panic_hud(x, y)
+    draw_text_ex(0, 0, @current_number)
+  end
+
+  def refresh
+    self.contents.clear
+    panic_data
+  end
+
+  def panic_data_changed
+    return true if @current_number != $game_variables[R2_Panic_Number_Colour::Panic_Var]
+    return true if @time % R2_Panic_Number_Colour::Seconds == 0
+    return false
+  end
+
+  alias r2_panic_update    update
+  def update
+    refresh if panic_data_changed
+    @time = $game_system.playtime
+    r2_panic_update
+  end
+ 
+  def image_open(value = false)
+    @image_shown = value
+  end
+ 
+  def see_image
+    return @image_shown
+  end
+ 
+  def image_erase
+    @panic_image.bitmap.dispose if @panic_image
+    @panic_image.dispose if @panic_image
+  end
+ 
+  alias r2_font_reset_colour  reset_font_settings
+  def reset_font_settings
+    r2_font_reset_colour
+    font = R2_Panic_Number_Colour::Font
+    font_size = R2_Panic_Number_Colour::Font_Size
+    self.contents.font = Font.new(font, font_size)
+    $game_variables[R2_Panic_Number_Colour::Panic_Var] = 100 if
+      $game_variables[R2_Panic_Number_Colour::Panic_Var] >= 100
+    $game_variables[R2_Panic_Number_Colour::Panic_Var] = 0 if
+      $game_variables[R2_Panic_Number_Colour::Panic_Var] <= 0
+    cnt = R2_Panic_Number_Colour::Colours.size
+    chk = 100 / cnt
+    if $game_variables[R2_Panic_Number_Colour::Panic_Var] == 100
+      col = R2_Panic_Number_Colour::Colours.size - 1
+    else
+      col = ($game_variables[R2_Panic_Number_Colour::Panic_Var] / chk).to_i
+    end
+    color = text_color(R2_Panic_Number_Colour::Colours[col])
+    contents.font.color.set(color)
+    show_panic(col)
+  end
+end
+ 
+class Scene_Map < Scene_Base
+  alias r2_map_panic_start  start
+  def start
+    r2_map_panic_start
+    fadeout(0)
+    @map_panic = Panic_Window.new
+    @map_panic.close
+    fadein(30)
+  end
+  alias r2_map_panic_update    update
+  def update
+    if $game_switches[R2_Panic_Number_Colour::Switch] == false
+      @map_panic.image_open(false) if @map_panic.open?
+      @map_panic_shown = false
+    else
+      @map_panic.image_open(true) if @map_panic.close?
+      @map_panic_shown = true
+    end
+    if @map_panic_shown == false
+      @map_panic.close if @map_panic.open?
+    else
+      @map_panic.open if @map_panic.close?
+      @map_panic.update
+    end
+    r2_map_panic_update
+  end
+  def call_menu
+    @map_panic.image_erase if @menu_calling && !$game_player.moving?
+    Sound.play_ok
+    SceneManager.call(Scene_Menu)
+    Window_MenuCommand::init_command_position
+  end
+  def perform_transfer
+    pre_transfer
+    @map_panic.image_erase if $game_player.transfer?
+    $game_player.perform_transfer
+    post_transfer
+  end
+  def update_encounter
+    if $game_player.encounter
+      @map_panic.image_erase
+      SceneManager.call(Scene_Battle)
+    end
+  end
+  def image_battle
+    @map_panic_shown = false
+    @map_panic.image_erase
+  end
+end
+
+class Game_Interpreter
+  alias r2_image_panic_command_301  command_301
+  def command_301
+    SceneManager.scene.image_battle
+    r2_image_panic_command_301
+  end
+end

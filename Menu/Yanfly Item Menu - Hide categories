@@ -1,0 +1,78 @@
+# ╔═════════════════════════════════════╦════════════════════╗
+# ║ Title: Yanfly Item Menu Types       ║  Version: 1.00     ║
+# ║ Author: Roninator2                  ║                    ║
+# ╠═════════════════════════════════════╬════════════════════╣
+# ║ Function:                           ║   Date Created     ║
+# ║    Only show category if there      ╠════════════════════╣
+# ║    is an item for that category     ║    07 Feb 2022     ║
+# ╚═════════════════════════════════════╩════════════════════╝
+# ╔══════════════════════════════════════════════════════════╗
+# ║ Instructions:                                            ║
+# ║   Plug and play                                          ║
+# ╚══════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                            ║
+# ║ Free for all uses in RPG Maker except nudity             ║
+# ╚══════════════════════════════════════════════════════════╝
+class Window_ItemCommand < Window_Command
+  def make_command_list
+    for command in YEA::ITEM::COMMANDS
+      case command
+      #--- Default Commands ---
+      when :item
+        add_command(Vocab::item, :item) unless $game_party.items.empty?
+      when :weapon
+        add_command(Vocab::weapon, :weapon) unless $game_party.weapons.empty?
+      when :armor
+        add_command(Vocab::armor, :armor) unless $game_party.armors.empty?
+      when :key_item
+        add_command(Vocab::key_item, :key_item)
+      #--- Imported ---
+      when :gogototori
+        next unless $imported["KRX-AlchemicSynthesis"]
+        process_custom_command(command)
+      #--- Custom Commands ---
+      else
+        process_custom_command(command)
+      end
+    end
+  end
+end
+class Window_ItemType < Window_Command
+  def make_command_list
+    return if @type.nil?
+    #---
+    case @type
+    when :item
+      commands = YEA::ITEM::ITEM_TYPES
+    when :weapon
+      commands = YEA::ITEM::WEAPON_TYPES
+    else
+      commands = YEA::ITEM::ARMOUR_TYPES
+    end
+    #---
+    for command in commands
+      case @type
+      when :weapon
+        for i in 0..$game_party.weapons.size - 1
+          if $game_party.weapons[i].note.include?(command[1])
+            add_command(command[1], command[0], true, @type) unless @list.find {|x| x[:name] == command[1]}
+          end
+        end
+      when :armor
+        for i in 0..$game_party.armors.size - 1
+          if $game_party.armors[i].note.include?(command[1])
+            add_command(command[1], command[0], true, @type) unless @list.find {|x| x[:name] == command[1]}
+          end
+        end
+      when :item
+        for i in 0..$game_party.items.size - 1
+          if $game_party.items[i].note.include?(command[1])
+            add_command(command[1], command[0], true, @type) unless @list.find {|x| x[:name] == command[1]}
+          end
+        end
+      end
+      add_command(command[1], command[0], true, @type) if command[0] == :all
+    end
+  end
+end

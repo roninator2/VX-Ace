@@ -1,17 +1,45 @@
-#==============================================================================
-# Compatibility Patch :                                         v1.0 (05/10/20)
-#   Neon Black Victory Grade + KMS Generic Gauge
-#==============================================================================
-# Script by:
-#     Mr. Bubble - recreated by Roninator2
-#--------------------------------------------------------------------------
-# Place this script below both Neon Black Victory Grade and KMS Generic Gauge
-# in your script edtior.
-#
-#==============================================================================
-
-$imported ||= {}
-$kms_imported ||= {} 
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Generic Gauge for Victory Grade        ║  Version: 1.00     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║   Script Function                             ║    05 Oct 2020     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: Neon Black Victory Grade                                 ║
+# ║           KMS Generic Gauge                                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║       Provide Generic Gauges for Neon Black Victory Grade          ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║   Plug and play                                                    ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 22 Nov 2024 - Script finished                               ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║   Mr. Bubble                                                       ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
 
 module Bubs
   module GGPatch
@@ -30,6 +58,13 @@ module Bubs
     GRADE_EXP_SLOPE = 30
   end
 end
+
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║                      End of editable region                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+$imported ||= {}
+$kms_imported ||= {} 
 
 if $imported['CP_VICTORY'] && $kms_imported["GenericGauge"]
 class Window_VictoryMain < Window_Selectable

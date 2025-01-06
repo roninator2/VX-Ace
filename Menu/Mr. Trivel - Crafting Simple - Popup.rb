@@ -41,7 +41,9 @@
 # ║  No part of this code can be used with AI programs or tools        ║
 # ║  Credit must be given                                              ║
 # ╚════════════════════════════════════════════════════════════════════╝
-
+module R2_Trivel_craft_message
+  CONFIRM = " crafted!"
+end
 class Window_Craft_ConfirmPopup < Window_Selectable
   def initialize
     super(320, 300, window_width, window_height)
@@ -52,7 +54,7 @@ class Window_Craft_ConfirmPopup < Window_Selectable
   def refresh; end
   def craft_item(item)
     contents.clear
-    text1, text2 = item.name, " crafted!"
+    text1, text2 = item.name, R2_Trivel_craft_message::CONFIRM
     width = contents.text_size(text1 + text2).width + 30
     create_contents
     draw_text(24,1,contents.width,24,text1)

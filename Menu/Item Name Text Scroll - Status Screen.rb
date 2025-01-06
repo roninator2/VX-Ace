@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Status Item Name Scroll Text           ║  Version: 1.00     ║
+# ║ Title: Status Item Name Scroll Text           ║  Version: 1.01     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -26,6 +26,7 @@
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Updates:                                                           ║
 # ║ 1.00 - 17 Sep 2023 - Script finished                               ║
+# ║ 1.01 - added support for item rarity script                        ║
 # ║                                                                    ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
@@ -45,13 +46,11 @@
 # ║  Credit must be given                                              ║
 # ╚════════════════════════════════════════════════════════════════════╝
 
+
 module R2_Item_Scroll_Name
   Status_Speed = 0.8 # anything from 0.4 to 1.2 is ok
+  Status_length = 16
 end
-
-# ╔════════════════════════════════════════════════════════════════════╗
-# ║                      End of editable region                        ║
-# ╚════════════════════════════════════════════════════════════════════╝
 
 #==============================================================================
 # ** Window_Status
@@ -74,7 +73,11 @@ class Window_Status < Window_Selectable
   def draw_item_name(item, x, y, enabled = true, width = 175)
     return unless item
     draw_icon(item.icon_index, x, y, enabled)
-    change_color(normal_color, enabled)
+    if $imported[:TH_ItemRarity]
+      change_color(item.rarity_colour, enabled)
+    else
+      change_color(normal_color, enabled)
+    end
     cw = contents.text_size(item.name).width
     if cw < width
       draw_text(x + 24, y, width, line_height, item.name)
@@ -90,7 +93,7 @@ class Window_Status < Window_Selectable
   def update
     # Original method.
     r2_update_status_text_scroll
-    # data -> key = id -> 0 = text, 1 = speed, 2 = width, 3 = bitmap, 
+    # data -> key = id -> 0 = text, 1 = speed, 2 = width, 3 = bitmap,
     # 4 - position {x,y}, 5 - text width, 6 - placement, 7 - direction <- ->
     # 8 - viewport, 9 - type
     return if @r2_scrolling_status_text_line.nil? || @r2_scrolling_status_text_line.empty?
@@ -116,12 +119,12 @@ class Window_Status < Window_Selectable
   #--------------------------------------------------------------------------
   def set_text(id, x, y, text, width)
     # New text?
-    # data -> key = id -> 0 = text, 1 = speed, 2 = width, 3 = bitmap, 
+    # data -> key = id -> 0 = text, 1 = speed, 2 = width, 3 = bitmap,
     # 4 - position, 5 - text width, 6 - placement, 7 - direction,
     # 8 - viewport
     @r2_scrolling_status_text_line ||= {}
     cw = contents.text_size(text).width
-    if @r2_scrolling_status_text_line.empty? || @r2_scrolling_status_text_line[id].nil? || 
+    if @r2_scrolling_status_text_line.empty? || @r2_scrolling_status_text_line[id].nil? ||
         text != @r2_scrolling_status_text_line[id][1]
       # Dispose the Scrolling Help objects if needed.
       r2_scrolling_text_dispose(id) if @r2_scrolling_status_text_line[id] != nil
@@ -129,7 +132,7 @@ class Window_Status < Window_Selectable
       x = x + self.x
       if cw > width
         # draw the line as a scrolling line.
-        @r2_scrolling_status_text_line[id] = [text, speed, width, nil, [x, y], cw, 
+        @r2_scrolling_status_text_line[id] = [text, speed, width, nil, [x, y], cw,
           x, 0, nil]
         r2_scrolling_text_create(id, x, y, text, width)
       end

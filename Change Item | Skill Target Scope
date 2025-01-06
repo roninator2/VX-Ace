@@ -1,0 +1,201 @@
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Change Item/Skill Scope                ║  Version: 1.00     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║  Alter Item and Skill Scopes                  ║    11 Mar 2023     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: nil                                                      ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║       Change the Skill scope in mid game                           ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║                                                                    ║
+# ║    Use script command to change the skill scope                    ║
+# ║      change_skill_scope(skill_id, scope)                           ║
+# ║      e.g.                                                          ║
+# ║      change_skill_scope(14,3)                                      ║
+# ║                                                                    ║
+# ║    Use script command to change the item scope                     ║
+# ║      change_skill_scope(item_id, scope)                            ║
+# ║      change_item_scope(1,3)                                        ║
+# ║                                                                    ║
+# ║    List of scopes:                                                 ║
+# ║      0 = none                                                      ║
+# ║      1 = one enemy                                                 ║
+# ║      2 = all enemies                                               ║
+# ║      3 = 1 random enemy                                            ║
+# ║      4 = 2 random enemies                                          ║
+# ║      5 = 3 random enemies                                          ║
+# ║      6 = 4 random enemies                                          ║
+# ║      7 = 1 ally                                                    ║
+# ║      8 = all allies                                                ║
+# ║      9 = 1 ally (dead?)                                            ║
+# ║      10 = all allies (dead?)                                       ║
+# ║      11 = the user                                                 ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 11 Mar 2023 - Script finished                               ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+#==============================================================================
+# ** DataManager
+#==============================================================================
+module DataManager
+  #--------------------------------------------------------------------------
+  # * Create Save Contents
+  #--------------------------------------------------------------------------
+  class <<self; alias make_database_save_skill_item make_save_contents; end
+  def self.make_save_contents
+    $game_player.load_data = true
+    contents = make_database_save_skill_item
+    contents
+  end
+end # DataManager
+
+#==============================================================================
+# ** Game_Temp
+#==============================================================================
+
+class Game_Player < Game_Character
+  #--------------------------------------------------------------------------
+  # * Public Instance Variables
+  #--------------------------------------------------------------------------
+  attr_accessor :skill_scope
+  attr_accessor :item_scope
+  attr_accessor :load_data
+  #--------------------------------------------------------------------------
+  # * Object Initialization
+  #--------------------------------------------------------------------------
+  alias r2_temp_item_skill_scope_init  initialize
+  def initialize
+    r2_temp_item_skill_scope_init
+    @skill_scope = []
+    @item_scope = []
+    @load_data = false
+  end
+  #--------------------------------------------------------------------------
+  # common cache: load_scope_for_item
+  #--------------------------------------------------------------------------
+  def load_scope_for_item
+    @item_scope.each do |i|
+      $data_items[i[0]].scope = 
+      $data_items[i[1]]
+      $game_party.items.each do |h|
+        if h.id == i[0]
+          h.scope = i[1]
+        end
+      end
+    end
+  end
+  #--------------------------------------------------------------------------
+  # common cache: load_scope_for_skill
+  #--------------------------------------------------------------------------
+  def load_scope_for_skill
+    @skill_scope.each do |i|
+      $data_skills[i[0]].scope = 
+      $data_skills[i[1]]
+      $game_party.members.each do |a|
+        a.skills.each do |s|
+          if s.id == i[0]
+            s.scope = i[1]
+          end
+        end
+      end
+    end
+  end
+  #--------------------------------------------------------------------------
+  # * Frame Update
+  #--------------------------------------------------------------------------
+  alias r2_skill_item_scope_update  update
+  def update
+    r2_skill_item_scope_update
+    if @load_data == true
+      load_scope_for_item
+      load_scope_for_skill
+      @load_data = false
+    end
+  end
+  #--------------------------------------------------------------------------
+  # common cache: set_scope_for_skill
+  #--------------------------------------------------------------------------
+  def set_scope_for_skill(skill_id, scope)
+    found = false
+    id = nil
+    for i in 0..@skill_scope.size - 1
+      if @skill_scope[i][0] == skill_id
+        found = true 
+        id = i
+      end
+    end
+    if found == true
+      @skill_scope[id][1] = scope
+    else
+      @skill_scope << [skill_id, scope]
+    end
+  end
+  #--------------------------------------------------------------------------
+  # common cache: set_scope_for_item
+  #--------------------------------------------------------------------------
+  def set_scope_for_item(item_id, scope)
+    found = false
+    id = nil
+    for i in 0..@item_scope.size - 1
+      if @item_scope[i][0] == item_id
+        found = true 
+        id = i
+      end
+    end
+    if found == true
+      @item_scope[id][1] = scope
+    else
+      @item_scope << [item_id, scope]
+    end
+  end
+end
+
+#==============================================================================
+# ■ Game Interpreter
+#==============================================================================
+class Game_Interpreter
+  def change_skill_scope(skill_id, scope)
+    $data_skills[skill_id].scope = scope
+    $game_player.set_scope_for_skill(skill_id, scope)
+  end
+  def change_item_scope(item_id, scope)
+    $data_items[item_id].scope = scope
+    $game_player.set_scope_for_item(item_id, scope)
+  end
+  def show_skill_scope(skill_id)
+    p($data_skills[skill_id])
+    p($game_player.skill_scope)
+  end
+  def show_item_scope(item_id)
+    p($data_items[item_id])
+    p($game_player.item_scope)
+  end
+end

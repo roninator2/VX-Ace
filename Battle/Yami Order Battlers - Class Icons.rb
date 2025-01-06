@@ -1,25 +1,54 @@
-#==============================================================================
-# 
-# ▼ YSA Battle Add-On: Order Battlers - Class Icons
-# -- Last Updated: 2012.02.20
-# -- Level: Easy
-# -- Requires: n/a
-# 
-#==============================================================================
-# ▼ Instructions
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Place below Order Battlers
-# 
-# -----------------------------------------------------------------------------
-# Class Notetags - These notetags go in the class notebox in the database.
-# -----------------------------------------------------------------------------
-# <battler class icon: x>
-# Change actor's icon into x for class
-#
-# <class icon hue: x>
-# Change icon hue.
-# 
-#==============================================================================
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Order Battler Patch - Class Icons      ║  Version: 1.01     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║   Patch for Yami order battlers Class Icons   ║    13 Sep 2022     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: Yanfly Battle Engine                                     ║
+# ║           Yami Order Battlers                                      ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║     Order Battlers - Show Class Icons                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║   Place below Order Battlers                                       ║
+# ║   Class Notetags - These notetags go in the class notebox          ║
+# ║     in the database.                                               ║
+# ║                                                                    ║
+# ║   <battler class icon: x>                                          ║
+# ║   Change actor's icon into x for class                             ║
+# ║                                                                    ║
+# ║   <class icon hue: x>                                              ║
+# ║   Change icon hue.                                                 ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 13 Sep 2022 - Script finished                               ║
+# ║ 1.01 - 13 Sep 2022 - added fix for memory leaks                    ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
 module YSA
   module REGEXP
     module ACTOR
@@ -28,6 +57,7 @@ module YSA
     end # ACTOR
   end
 end
+
 class RPG::Class < RPG::BaseItem
   attr_accessor :battler_class_icon
   attr_accessor :class_icon_hue
@@ -45,6 +75,7 @@ class RPG::Class < RPG::BaseItem
     }
   end
 end
+
 class Game_Battler < Game_BattlerBase
   def battler_class_icon
     aci = $data_classes[actor.class_id]
@@ -55,6 +86,7 @@ class Game_Battler < Game_BattlerBase
     aci.class_icon_hue
   end
 end
+
 module DataManager
   def self.load_notetags_orbt
     groups = [$data_enemies + $data_actors + $data_classes]
@@ -66,6 +98,7 @@ module DataManager
     end
   end
 end # DataManager
+
 class Sprite_OrderBattler < Sprite_Base
   def create_dtb_style
     bitmap = Bitmap.new(24, 24)

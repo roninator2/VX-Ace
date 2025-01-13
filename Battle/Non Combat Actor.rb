@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Non Combat Actor                       ║  Version: 1.09     ║
+# ║ Title: Non Combat Actor                       ║  Version: 1.12     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -16,9 +16,9 @@
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Instructions:                                                      ║
-# ║ Place note tag on actor note box. <non combat>                     ║
-# ║ Change number below to Max battle members                          ║
-# ║                                                                    ║
+# ║   Place note tag on actor note box. <non combat>                   ║
+# ║   Change number below to Max battle members                        ║
+# ║ Known Bug: adding actors already in party breaks this script       ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Updates:                                                           ║
@@ -31,7 +31,10 @@
 # ║ 1.06 - 03 Jan 2025 - Cleaned up unneeded code                      ║
 # ║ 1.07 - 03 Jan 2025 - Fixed gaining exp for non battle actors       ║
 # ║ 1.08 - 03 Jan 2025 - Attempt to fix issues reported                ║
-# ║ 1.09 - 04 Jan 2025 - Fix for Yanfly Battle Engine                  ║
+# ║ 1.09 - 04 Jan 2025 - Made changes                                  ║
+# ║ 1.10 - 08 Jan 2025 - Had to account for adding actors later        ║
+# ║ 1.11 - 09 Jan 2025 - Issue with large parties                      ║
+# ║ 1.12 - 10 Jan 2025 - Fixed duplicating actors                      ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -61,17 +64,22 @@ end
 # ║      No more editing                                     ║
 # ╚══════════════════════════════════════════════════════════╝
 
-class Game_Follower
+class Game_Follower < Game_Character
+  attr_reader :member_index
   def set_character(character_name, character_index)
     @character_name = character_name
     @character_index = character_index
   end
+  def actor
+    $game_party.members[@member_index]
+  end
 end
 
 class Game_Followers
+  attr_reader :data
   def initialize(leader)
     @visible = $data_system.opt_followers
-    @gathering = false 
+    @gathering = false
     @data = []
     @data.push(Game_Follower.new(1, leader))
     (2...$game_party.max_battle_members.size).each do |index|
@@ -83,13 +91,29 @@ class Game_Followers
     return if $game_party.non_battle_members == []
     $game_party.non_battle_members.each do |i|
       @data.push(Game_Follower.new(@data.size, @data[-1]))
+      new = @data[-1]
+      new.moveto($game_player.x, $game_player.y)
+    end
+  end
+  def add_non_follower(index)
+    found = false
+    @data.each { |fol|
+      if fol.member_index == index
+        found = true
+      end
+    }
+    if found == false
+      @data.push(Game_Follower.new(index, @data[-1]))
+      new = @data[-1]
+      old = @data[-2]
+      new.moveto(old.x, old.y)
     end
   end
 end
 
 class Game_Party < Game_Unit
   attr_reader :non_battle_members
-  
+ 
   alias :r2_game_party_initialize_na :initialize
   def initialize
     r2_game_party_initialize_na
@@ -108,7 +132,7 @@ class Game_Party < Game_Unit
     end
     return array
   end
-  
+ 
   def not_battle_members
     @non_battle_members = []
     for act in @actors
@@ -121,13 +145,9 @@ class Game_Party < Game_Unit
     end
     return @non_battle_members
   end
-  
+ 
   def max_battle_members
-    if $imported["YEA-BattleEngine"] == true
-      return R2_Max_Battle_Members::MAX
-    else
-      in_battle ? battle_members.size : battle_members.size + not_battle_members.size
-    end
+    in_battle ? battle_members.size : battle_members.size + not_battle_members.size
   end
 
   alias :r2_setup_starting_members_nb :setup_starting_members
@@ -136,43 +156,47 @@ class Game_Party < Game_Unit
     not_battle_members
     $game_player.followers.setup_non_battle_members
   end
-  
+ 
   alias :r2_swap_order_non_combat :swap_order
   def swap_order(index1, index2)
     r2_swap_order_non_combat(index1, index2)
     $game_player.refresh
   end
-  
+ 
   alias :r2_add_actor_non_combat  :add_actor
   def add_actor(actor_id)
+    list = []
+    $game_party.members.each { |mem|  list.push(mem.clone) }
     r2_add_actor_non_combat(actor_id)
     not_battle_members
-    $game_player.refresh
-    $game_map.need_refresh = true
+    nonact = $data_actors[actor_id]
+    if nonact.note =~ /<non combat>/i
+      $game_player.followers.add_non_follower(actor_id) unless
+        list.include?($game_actors[actor_id])
+    end
+    SceneManager.scene.instance_variable_get(:@spriteset).refresh_characters
   end
 
   alias :r2_remove_actor_non_combat  :remove_actor
   def remove_actor(actor_id)
     r2_remove_actor_non_combat(actor_id)
-    not_battle_members
     $game_player.refresh
     $game_map.need_refresh = true
   end
 end
 
 class Scene_Map < Scene_Base
-  
   alias :r2_not_battle_member_update :update
   def update
     r2_not_battle_member_update
-    call_not_battle_member_graphic if $game_player.followers.visible
+    call_not_battle_member_graphic if $game_player.followers.visible_folloers
   end
 
   def call_not_battle_member_graphic
     return if R2_Max_Battle_Members::SHOW_NON_COMBAT == false
     pos = 0
     cnt = 0
-    $game_party.members.each_with_index do |actor, index|
+    $game_party.all_members.each_with_index do |actor, index|
       next if actor == nil
       next if index == 0
       nonact = $data_actors[actor.id]
@@ -181,22 +205,22 @@ class Scene_Map < Scene_Base
         next unless follower
         follower.set_character(actor.character_name, actor.character_index)
       else
-        if cnt < $game_party.battle_members.size
+        if cnt < $game_party.battle_members.size - 1
           follower = $game_player.followers[index - 1 - pos]
           next unless follower
           follower.set_character(actor.character_name, actor.character_index)
+          cnt += 1
         else
           pos += 1
         end
       end
-      cnt += 1
     end
   end
 end
 
 class Game_Actor < Game_Battler
   def reserve_members_exp_rate
-    if $game_party.non_battle_members.include?(self) && 
+    if $game_party.non_battle_members.include?(self) &&
       R2_Max_Battle_Members::GAIN_EXP_NON_COMBAT
         return R2_Max_Battle_Members::EXP_RATE
     else

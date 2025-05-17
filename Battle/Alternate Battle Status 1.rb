@@ -42,8 +42,7 @@
 # ║ 1.12 - 27 May 2024 - Added scrolling icons for enemies             ║
 # ║ 1.13 - 28 May 2024 - Moved Actor Command Window to the Left        ║
 # ║ 1.14 - 17 May 2025 - Fixed enemy HP not aligning center            ║
-# ║ 1.15 - 17 May 2025 - Increased the speed of Battle Status changing ║
-# ║                      A fix for a visual glitch when doing commands ║
+# ║ 1.15 - 17 May 2025 - Fixed Graphic glitch for scrolling icons      ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -178,6 +177,7 @@ end
 # ** Window_BattleStatus
 #==============================================================================
 class Window_BattleStatus < Window_Selectable
+  attr_reader :battle_view
   #--------------------------------------------------------------------------
   # * Get Row Count
   #--------------------------------------------------------------------------
@@ -204,6 +204,7 @@ class Window_BattleStatus < Window_Selectable
     draw_actor_action(actor, rect.x+10, rect.y-16) if
       R2_ALT_BATTLE_STATUS_ONE::SHOW_ACTION_ICONS == true
     if BattleManager.phase? != :input
+      @battle_view = true
       rect = item_rect_for_status(index)
       draw_actor_ap(actor, rect.x+30, rect.y, R2_ALT_BATTLE_STATUS_ONE::AP_GAUGE_WIDTH) if $imported && $imported["R2_CTB_CC"] == true
       draw_actor_name(actor, rect.x+10, rect.y, rect.width+20)
@@ -219,6 +220,7 @@ class Window_BattleStatus < Window_Selectable
       end
     else
       return if actor != BattleManager.actor
+      @battle_view = false
       rect = item_rect(index)
       draw_actor_face(actor, rect.x, rect.y+2, actor.alive?)
       draw_actor_name(actor, rect.x+100, rect.y, rect.width-8)
@@ -295,7 +297,7 @@ class Window_BattleStatus < Window_Selectable
   # * refresh_actor_scroll_icons
   #--------------------------------------------------------------------------
   def refresh_actor_scroll_icons
-    if BattleManager.phase? != :input
+    if BattleManager.phase? != :input && @battle_view
       $game_party.battle_members.each do |mem|
         draw_actor_scroll_icons(mem)
       end
@@ -746,21 +748,5 @@ class Scene_Battle < Scene_Base
     @actor_command_window.set_handler(:guard,  method(:command_guard))
     @actor_command_window.set_handler(:item,   method(:command_item))
     @actor_command_window.set_handler(:cancel, method(:prior_command))
-  end
-  #--------------------------------------------------------------------------
-  # * Enemy [OK]
-  #--------------------------------------------------------------------------
-  alias :r2_enemy_ok_refresh_status    :on_enemy_ok
-  def on_enemy_ok
-    r2_enemy_ok_refresh_status
-    @status_window.refresh
-  end
-  #--------------------------------------------------------------------------
-  # * Actor [OK]
-  #--------------------------------------------------------------------------
-  alias :r2_actor_ok_refresh_status    :on_actor_ok
-  def on_actor_ok
-    r2_actor_ok_refresh_status
-    @status_window.refresh
   end
 end

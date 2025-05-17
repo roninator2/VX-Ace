@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Alternate Battle Status 1              ║  Version: 1.13     ║
+# ║ Title: Alternate Battle Status 1              ║  Version: 1.15     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -41,6 +41,9 @@
 # ║ 1.11 - 18 May 2024 - Fixed scrolling icons                         ║
 # ║ 1.12 - 27 May 2024 - Added scrolling icons for enemies             ║
 # ║ 1.13 - 28 May 2024 - Moved Actor Command Window to the Left        ║
+# ║ 1.14 - 17 May 2025 - Fixed enemy HP not aligning center            ║
+# ║ 1.15 - 17 May 2025 - Increased the speed of Battle Status changing ║
+# ║                      A fix for a visual glitch when doing commands ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -596,10 +599,8 @@ class Window_BattleEnemy < Window_Selectable
     if R2_ALT_BATTLE_STATUS_ONE::SHOW_ENEMY_ICONS
       if col_max == 1
         draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, rect.x+200, rect.y)
-        rect.x += 150
-        rect.width = 200
-        text = "#{enmy.hp} / #{enmy.mhp}"
-        draw_text(rect, text, 2)
+        draw_current_and_max_values(rect.x, rect.y, rect.width - rect.x - 40,
+        enmy.hp.to_i, enmy.mhp, hp_color(enmy), normal_color)
       else
         draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, rect.x+100, rect.y)
         rect.x += 140
@@ -745,5 +746,21 @@ class Scene_Battle < Scene_Base
     @actor_command_window.set_handler(:guard,  method(:command_guard))
     @actor_command_window.set_handler(:item,   method(:command_item))
     @actor_command_window.set_handler(:cancel, method(:prior_command))
+  end
+  #--------------------------------------------------------------------------
+  # * Enemy [OK]
+  #--------------------------------------------------------------------------
+  alias :r2_enemy_ok_refresh_status    :on_enemy_ok
+  def on_enemy_ok
+    r2_enemy_ok_refresh_status
+    @status_window.refresh
+  end
+  #--------------------------------------------------------------------------
+  # * Actor [OK]
+  #--------------------------------------------------------------------------
+  alias :r2_actor_ok_refresh_status    :on_actor_ok
+  def on_actor_ok
+    r2_actor_ok_refresh_status
+    @status_window.refresh
   end
 end

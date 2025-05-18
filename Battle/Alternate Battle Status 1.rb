@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Alternate Battle Status 1              ║  Version: 1.15     ║
+# ║ Title: Alternate Battle Status 1              ║  Version: 1.16     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -43,6 +43,7 @@
 # ║ 1.13 - 28 May 2024 - Moved Actor Command Window to the Left        ║
 # ║ 1.14 - 17 May 2025 - Fixed enemy HP not aligning center            ║
 # ║ 1.15 - 17 May 2025 - Fixed Graphic glitch for scrolling icons      ║
+# ║ 1.16 - 18 May 2025 - Fixed Actor Status Window X position          ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -702,6 +703,7 @@ class Scene_Battle < Scene_Base
   alias :r2_select_actor_status_window    :select_actor_selection
   def select_actor_selection
     r2_select_actor_status_window
+    @actor_window.x = @actor_command_window.width
     @status_window.hide
   end
   #--------------------------------------------------------------------------

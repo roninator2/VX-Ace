@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Alternate Battle Status 1              ║  Version: 1.17     ║
+# ║ Title: Alternate Battle Status 1              ║  Version: 1.16     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -44,7 +44,6 @@
 # ║ 1.14 - 17 May 2025 - Fixed enemy HP not aligning center            ║
 # ║ 1.15 - 17 May 2025 - Fixed Graphic glitch for scrolling icons      ║
 # ║ 1.16 - 18 May 2025 - Fixed Actor Status Window X position          ║
-# ║ 1.17 - 20 May 2025 - Added Drawing Icons for Main Menu             ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -77,9 +76,6 @@ module R2_ALT_BATTLE_STATUS_ONE
   BLANK_ICON = 16          # icon shown for icon placement
   AP_GAUGE_WIDTH = 120     # width of AP gauge when using Circle Cross CTB
   SHOW_ENEMY_STATES = true # Show enemy inflicted states and buffs
-  MAIN_MENU_HP_MP_X_OFFSET = 28   # adjust position of HP & MP in Menu
-  MAIN_MENU_TP_X_OFFSET = 100     # adjust position of TP in Menu
-  MAIN_MENU_ICON_X_OFFSET = 200    # adjust the icon position in Menu
 end
 
 #==============================================================================
@@ -754,33 +750,5 @@ class Scene_Battle < Scene_Base
     @actor_command_window.set_handler(:guard,  method(:command_guard))
     @actor_command_window.set_handler(:item,   method(:command_item))
     @actor_command_window.set_handler(:cancel, method(:prior_command))
-  end
-end
-
-class Window_MenuStatus < Window_Selectable
-  #--------------------------------------------------------------------------
-  # * Draw Item
-  #--------------------------------------------------------------------------
-  def draw_item(index)
-    hmx_off = R2_ALT_BATTLE_STATUS_ONE::MAIN_MENU_HP_MP_X_OFFSET
-    tpx_off = R2_ALT_BATTLE_STATUS_ONE::MAIN_MENU_TP_X_OFFSET
-    icon_x_off = R2_ALT_BATTLE_STATUS_ONE::MAIN_MENU_ICON_X_OFFSET
-    actor = $game_party.members[index]
-    enabled = $game_party.battle_members.include?(actor)
-    rect = item_rect(index)
-    draw_item_background(index)
-    draw_actor_face(actor, rect.x + 1, rect.y + 1, enabled)
-    if R2_ALT_BATTLE_STATUS_ONE::SHOW_STAT_ICONS == true
-      draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, rect.x+icon_x_off, rect.y + line_height*1)
-      draw_current_and_max_values(rect.x + hmx_off, rect.y + line_height*1, rect.width - rect.x - 40,
-        actor.hp, actor.mhp, hp_color(actor), normal_color)
-      draw_icon(R2_ALT_BATTLE_STATUS_ONE::MP_ICON, rect.x+icon_x_off, rect.y + line_height*2)
-      draw_current_and_max_values(rect.x + hmx_off, rect.y + line_height*2, rect.width - rect.x - 40,
-        actor.mp.to_i, actor.mmp, mp_color(actor), normal_color)
-      draw_icon(R2_ALT_BATTLE_STATUS_ONE::TP_ICON, rect.x+icon_x_off, rect.y + line_height*3)
-      draw_text(width - tpx_off, rect.y + line_height*3, 64, line_height, actor.tp.to_i, 2)
-    else
-      draw_actor_simple_status(actor, rect.x + 108, rect.y + line_height / 2)
-    end
   end
 end

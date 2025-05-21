@@ -1,0 +1,133 @@
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Alternate Battle Status Menu Style     ║  Version: 1.00     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║ Display Menu like Alternate Battle Status     ║    21 May 2025     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: nil                                                      ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║       Provide alternate Menu display like battle status view       ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║                                                                    ║
+# ║  Set the values below for X position of data                       ║
+# ║                                                                    ║
+# ║  Otherwise plug and play                                           ║
+# ║                                                                    ║
+# ║  To show the states properly you need to use a scrolling state     ║
+# ║  script such as Neon Black Scrolling States                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 12 Oct 2023 - Script finished                               ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║   Yanfly                                                           ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+module R2_ALT_BATTLE_STATUS_ONE
+  MAIN_MENU_HP_MP_X_OFFSET = 28    # adjust position of HP & MP in Menu
+  MAIN_MENU_TP_X_OFFSET = 100      # adjust position of TP in Menu
+  MAIN_MENU_ICON_X_OFFSET = 200    # adjust the icon position in Menu
+  SKILL_MENU_HP_MP_X_OFFSET = 128  # adjust position of HP & MP in Menu
+  SKILL_MENU_ICON_X_OFFSET = 100   # adjust the icon position in Menu
+  STATUS_MENU_HP_MP_X_OFFSET = 20  # adjust position of HP & MP in Menu
+  STATUS_MENU_ICON_X_OFFSET = 0    # adjust the icon position in Menu
+  STATUS_MENU_TP_X_OFFSET = 75     # adjust position of TP in Menu
+end
+
+class Window_MenuStatus < Window_Selectable
+  #--------------------------------------------------------------------------
+  # * Draw Item
+  #--------------------------------------------------------------------------
+  def draw_item(index)
+    hmx_off = R2_ALT_BATTLE_STATUS_ONE::MAIN_MENU_HP_MP_X_OFFSET
+    tpx_off = R2_ALT_BATTLE_STATUS_ONE::MAIN_MENU_TP_X_OFFSET
+    icon_x_off = R2_ALT_BATTLE_STATUS_ONE::MAIN_MENU_ICON_X_OFFSET
+    actor = $game_party.members[index]
+    enabled = $game_party.battle_members.include?(actor)
+    rect = item_rect(index)
+    draw_item_background(index)
+    draw_actor_face(actor, rect.x + 1, rect.y + 1, enabled)
+    if R2_ALT_BATTLE_STATUS_ONE::SHOW_STAT_ICONS == true
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, rect.x+icon_x_off, rect.y + line_height*1)
+      draw_current_and_max_values(rect.x + hmx_off, rect.y + line_height*1, rect.width - rect.x - 40,
+        actor.hp, actor.mhp, hp_color(actor), normal_color)
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::MP_ICON, rect.x+icon_x_off, rect.y + line_height*2)
+      draw_current_and_max_values(rect.x + hmx_off, rect.y + line_height*2, rect.width - rect.x - 40,
+        actor.mp.to_i, actor.mmp, mp_color(actor), normal_color)
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::TP_ICON, rect.x+icon_x_off, rect.y + line_height*3)
+      draw_text(width - tpx_off, rect.y + line_height*3, 64, line_height, actor.tp.to_i, 2)
+    else
+      draw_actor_simple_status(actor, rect.x + 108, rect.y + line_height / 2)
+    end
+  end
+end
+
+class Window_SkillStatus < Window_Base
+  def refresh
+    contents.clear
+    return unless @actor
+    draw_actor_face(@actor, 0, 0)
+    hmx_off = R2_ALT_BATTLE_STATUS_ONE::SKILL_MENU_HP_MP_X_OFFSET
+    icon_x_off = R2_ALT_BATTLE_STATUS_ONE::SKILL_MENU_ICON_X_OFFSET
+    x = 108; y = line_height / 2
+    draw_actor_name(@actor, x, y)
+    draw_actor_level(@actor, x, y + line_height * 1)
+    draw_actor_icons(@actor, x, y + line_height * 2)
+    draw_actor_class(@actor, x + 120, y)
+    if R2_ALT_BATTLE_STATUS_ONE::SHOW_STAT_ICONS == true
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, x + icon_x_off, y + line_height*1)
+      draw_current_and_max_values(x + hmx_off, y + line_height*1, 120,
+        @actor.hp, @actor.mhp, hp_color(@actor), normal_color)
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::MP_ICON, x + icon_x_off, y + line_height*2)
+      draw_current_and_max_values(x + hmx_off, y + line_height*2, 120,
+        @actor.mp.to_i, @actor.mmp, mp_color(@actor), normal_color)
+    else
+      draw_actor_simple_status(@actor, 108, line_height / 2)
+    end
+  end
+end
+
+class Window_Status < Window_Selectable
+  def draw_basic_info(x, y)
+    draw_actor_level(@actor, x, y + line_height * 0)
+    draw_actor_icons(@actor, x, y + line_height * 1)
+    hmx_off = R2_ALT_BATTLE_STATUS_ONE::STATUS_MENU_HP_MP_X_OFFSET
+    tpx_off = R2_ALT_BATTLE_STATUS_ONE::STATUS_MENU_TP_X_OFFSET
+    icon_x_off = R2_ALT_BATTLE_STATUS_ONE::STATUS_MENU_ICON_X_OFFSET
+    if R2_ALT_BATTLE_STATUS_ONE::SHOW_STAT_ICONS == true
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, x + icon_x_off, y + line_height*1)
+      draw_current_and_max_values(x + hmx_off, y + line_height*1, 120,
+        @actor.hp, @actor.mhp, hp_color(@actor), normal_color)
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::MP_ICON, x + icon_x_off, y + line_height*2)
+      draw_current_and_max_values(x + hmx_off, y + line_height*2, 120,
+        @actor.mp.to_i, @actor.mmp, mp_color(@actor), normal_color)
+      draw_icon(R2_ALT_BATTLE_STATUS_ONE::TP_ICON, x + icon_x_off, y + line_height*3)
+      draw_text(x + tpx_off, y + line_height*3, 64, line_height, @actor.tp.to_i, 2)
+    else
+      draw_actor_hp(@actor, x, y + line_height * 2)
+      draw_actor_mp(@actor, x, y + line_height * 3)
+    end
+  end
+end

@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Alternate Battle Status Menu Style     ║  Version: 1.00     ║
+# ║ Title: Alternate Battle Status Menu Style     ║  Version: 1.01     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -26,7 +26,8 @@
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Updates:                                                           ║
-# ║ 1.00 - 12 Oct 2023 - Script finished                               ║
+# ║ 1.00 - 21 May 2025 - Script finished                               ║
+# ║ 1.01 - 22 May 2025 - forgot to include some stats in main menu     ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -69,6 +70,10 @@ class Window_MenuStatus < Window_Selectable
     rect = item_rect(index)
     draw_item_background(index)
     draw_actor_face(actor, rect.x + 1, rect.y + 1, enabled)
+    draw_actor_name(actor, rect.x + 108, rect.y)
+    draw_actor_level(actor, rect.x + 108, rect.y + line_height * 1)
+    draw_actor_icons(actor, rect.x + 108, rect.y + line_height * 2)
+    draw_actor_class(actor, rect.x + 108 + 120, rect.y)
     if R2_ALT_BATTLE_STATUS_ONE::SHOW_STAT_ICONS == true
       draw_icon(R2_ALT_BATTLE_STATUS_ONE::HP_ICON, rect.x+icon_x_off, rect.y + line_height*1)
       draw_current_and_max_values(rect.x + hmx_off, rect.y + line_height*1, rect.width - rect.x - 40,

@@ -23,6 +23,8 @@
 # ║   If no custom cost is provided then the default                   ║
 # ║   CC_CTB_AP_ACTION_LIMIT is used                                   ║
 # ║                                                                    ║
+# ║   If the cost is 0, then it uses the default                       ║
+# ║                                                                    ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Updates:                                                           ║

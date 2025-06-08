@@ -1,33 +1,54 @@
-# ╔═════════════════════════════════════╦════════════════════╗
-# ║ Title: Show ATB Bar for Enemies     ║  Version: 1.02     ║
-# ║ Author: Roninator2                  ║                    ║
-# ╠═════════════════════════════════════╬════════════════════╣
-# ║ Function:                           ║   Date Created     ║
-# ║                                     ╠════════════════════╣
-# ║   Show Enemy ATB Bar                ║    06 Jun 2023     ║
-# ╚═════════════════════════════════════╩════════════════════╝
-# ╔══════════════════════════════════════════════════════════╗
-# ║ Instructions:                                            ║
-# ║   Adjust the settings below                              ║
-# ║                                                          ║
-# ║   Due to the positioning of the enemy,                   ║
-# ║   you will likely need to adjust the bar position        ║
-# ║   so that the adjustment numbers are negative.           ║
-# ║   This is because I used the enemies screen position     ║
-# ║   which causes the bar to be at the bottom of the        ║
-# ║   enemy position. The window is also set to not          ║
-# ║   overlap the status window.                             ║
-# ║                                                          ║
-# ║   Requires Circle Cross AP script                        ║
-# ╚══════════════════════════════════════════════════════════╝
-# ╔══════════════════════════════════════════════════════════╗
-# ║ Terms of use:                                            ║
-# ║ Free for all uses in RPG Maker - Except Nudity           ║
-# ╚══════════════════════════════════════════════════════════╝
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Show ATB Bar for Enemies               ║  Version: 1.02     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║   Add ATB bar for enemies                     ║    06 Jun 2023     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: Circle Cross ATB Script                                  ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:  Show Enemy ATB Bar                             ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║   Adjust the settings below                                        ║
+# ║                                                                    ║
+# ║   Due to the positioning of the enemy,                             ║
+# ║   you will likely need to adjust the bar position                  ║
+# ║   so that the adjustment numbers are negative.                     ║
+# ║   This is because I used the enemies screen position               ║
+# ║   which causes the bar to be at the bottom of the                  ║
+# ║   enemy position. The window is also set to not                    ║
+# ║   overlap the status window.                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 22 Nov 2025 - Script finished                               ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
 
-# ╔══════════════════════════════════════════════════════════╗
-# ║ Customize below:                                         ║
-# ╚══════════════════════════════════════════════════════════╝
 module R2_AP_Gauge_Pos
   X_Adjust  = -70         # x position of the bar from the enemy position
   Y_Adjust  = -20         # y position of the bar from the enemy position
@@ -42,9 +63,9 @@ module R2_AP_Gauge_Pos
   Actor_Colour_1 = 30     # Starting colour of bar
   Actor_Colour_2 = 31     # Ending colour of bar
 end
-# ╔══════════════════════════════════════════════════════════╗
-# ║ End of Customization                                     ║
-# ╚══════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║                      End of editable region                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
 
 #==============================================================================
 # Enemy AP

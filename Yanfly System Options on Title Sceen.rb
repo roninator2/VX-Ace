@@ -1,10 +1,10 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Title Options                          ║  Version: 1.01     ║
+# ║ Title: YEA Title Options                      ║  Version: 1.02     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
-# ║    Show Options Command                       ╠════════════════════╣
-# ║    on title screen                            ║    16 Mar 2021     ║
+# ║    Preserve Yanfly System Options             ╠════════════════════╣
+# ║                                               ║    16 Mar 2021     ║
 # ╚═══════════════════════════════════════════════╩════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Requires: Yanfly's System Options                                  ║
@@ -23,6 +23,7 @@
 # ║ Updates:                                                           ║
 # ║ 1.00 - 19 Mar 2021 - Script finished                               ║
 # ║ 1.01 - 20 Sep 2022 - Fixed new game bug                            ║
+# ║ 1.02 - 28 Sep 2025 - Corrected issue for extra system data         ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -40,35 +41,72 @@
 # ║  No part of this code can be used with AI programs or tools        ║
 # ║  Credit must be given                                              ║
 # ╚════════════════════════════════════════════════════════════════════╝
+
 module DataManager
-  def self.setup_new_game
-    create_newgame_objects
-    $game_party.setup_starting_members
-    $game_map.setup($data_system.start_map_id)
-    $game_player.moveto($data_system.start_x, $data_system.start_y)
-    $game_party.members.each { |actor| actor.recover_all }
-    $game_player.refresh
-    Graphics.frame_count = 0
+  class << self; alias title_options_create_game_objects create_game_objects; end
+  def self.create_game_objects
+    if $game_system.nil?
+        title_options_create_game_objects
+    else
+      sysbase = gather_system_colour_sound
+      sysextra = gather_system_switch_variable
+      title_options_create_game_objects
+      set_system_colour_sound(sysbase)
+      set_system_switch_variable(sysextra)
+    end
   end
-  def self.create_newgame_objects
-    $game_temp          = Game_Temp.new
-    $game_timer         = Game_Timer.new
-    $game_message       = Game_Message.new
-    $game_switches      = Game_Switches.new
-    $game_variables     = Game_Variables.new
-    $game_self_switches = Game_SelfSwitches.new
-    $game_actors        = Game_Actors.new
-    $game_party         = Game_Party.new
-    $game_troop         = Game_Troop.new
-    $game_map           = Game_Map.new
-    $game_player        = Game_Player.new
+  def self.gather_system_colour_sound
+    data = {}
+    data[:bgm] = $game_system.volume(:bgm)
+    data[:bgs] = $game_system.volume(:bgs)
+    data[:sfx] = $game_system.volume(:sfx)
+    tone = $game_system.window_tone.clone
+    data[:red] = tone.red
+    data[:green] = tone.green
+    data[:blue] = tone.blue
+    return data
   end
-end
+  def self.gather_system_switch_variable
+    data = {}
+    YEA::SYSTEM::CUSTOM_SWITCHES.each do |sw|
+      next if !YEA::SYSTEM::COMMANDS.include?(sw[0])
+      data[sw[0]] = $game_switches[sw[1][0]]
+    end
+    YEA::SYSTEM::CUSTOM_VARIABLES.each do |var|
+      next if !YEA::SYSTEM::COMMANDS.include?(var[0])
+      data[var[0]] = $game_variables[var[1][0]]
+    end
+    return data
+  end
+  def self.set_system_colour_sound(data)
+    bgm = 100 - data[:bgm]
+    bgs = 100 - data[:bgs]
+    sfx = 100 - data[:sfx]
+    $game_system.volume_change(:bgm, -bgm)
+    $game_system.volume_change(:bgs, -bgs)
+    $game_system.volume_change(:sfx, -sfx)
+    tone = $game_system.window_tone.clone
+    tone.red = data[:red]
+    tone.green = data[:green]
+    tone.blue = data[:blue]
+    $game_system.window_tone = tone
+  end
+  def self.set_system_switch_variable(data)
+    YEA::SYSTEM::CUSTOM_SWITCHES.each do |sw|
+      next if !YEA::SYSTEM::COMMANDS.include?(sw[0])
+      $game_switches[sw[1][0]] = data[sw[0]]
+    end
+    YEA::SYSTEM::CUSTOM_VARIABLES.each do |var|
+      next if !YEA::SYSTEM::COMMANDS.include?(var[0])
+      $game_variables[var[1][0]] = data[var[0]]
+    end
+  end
+end #DataManager
 class Scene_Title < Scene_Base
   alias r2_title_options_start    start
   def start
     r2_title_options_start
-    DataManager.create_game_objects if $game_switches.nil?
+    DataManager.create_game_objects# if $game_switches.nil?
   end
   def create_command_window
     @command_window = Window_TitleCommand.new

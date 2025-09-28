@@ -77,7 +77,7 @@ module DataManager
       next if !YEA::SYSTEM::COMMANDS.include?(var[0])
       data[var[0]] = $game_variables[var[1][0]]
     end
-    if YEA::SYSTEM::CUSTOM_LISTS != nil
+    if YEA::SYSTEM.const_defined?(:CUSTOM_LISTS)
       YEA::SYSTEM::CUSTOM_LISTS.each do |var|
         next if !YEA::SYSTEM::COMMANDS.include?(var[0])
         data[var[0]] = $game_variables[var[1][0]]
@@ -86,12 +86,9 @@ module DataManager
     return data
   end
   def self.set_system_colour_sound(data)
-    bgm = 100 - data[:bgm]
-    bgs = 100 - data[:bgs]
-    sfx = 100 - data[:sfx]
-    $game_system.volume_change(:bgm, -bgm)
-    $game_system.volume_change(:bgs, -bgs)
-    $game_system.volume_change(:sfx, -sfx)
+    $game_system.set_volume(:bgm, data[:bgm])
+    $game_system.set_volume(:bgs, data[:bgs])
+    $game_system.set_volume(:sfx, data[:sfx])
     tone = $game_system.window_tone.clone
     tone.red = data[:red]
     tone.green = data[:green]
@@ -107,7 +104,7 @@ module DataManager
       next if !YEA::SYSTEM::COMMANDS.include?(var[0])
       $game_variables[var[1][0]] = data[var[0]]
     end
-    if YEA::SYSTEM::CUSTOM_LISTS != nil
+    if YEA::SYSTEM.const_defined?(:CUSTOM_LISTS)
       YEA::SYSTEM::CUSTOM_LISTS.each do |var|
         next if !YEA::SYSTEM::COMMANDS.include?(var[0])
         $game_variables[var[1][0]] = data[var[0]]

@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: YEA Title Options                      ║  Version: 1.02     ║
+# ║ Title: YEA Title Options                      ║  Version: 1.03     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -24,6 +24,7 @@
 # ║ 1.00 - 19 Mar 2021 - Script finished                               ║
 # ║ 1.01 - 20 Sep 2022 - Fixed new game bug                            ║
 # ║ 1.02 - 28 Sep 2025 - Corrected issue for extra system data         ║
+# ║ 1.03 - 28 Sep 2025 - Adeed support for my List Options addon       ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -76,6 +77,12 @@ module DataManager
       next if !YEA::SYSTEM::COMMANDS.include?(var[0])
       data[var[0]] = $game_variables[var[1][0]]
     end
+    if YEA::SYSTEM::CUSTOM_LISTS != nil
+      YEA::SYSTEM::CUSTOM_LISTS.each do |var|
+        next if !YEA::SYSTEM::COMMANDS.include?(var[0])
+        data[var[0]] = $game_variables[var[1][0]]
+      end
+    end
     return data
   end
   def self.set_system_colour_sound(data)
@@ -99,6 +106,12 @@ module DataManager
     YEA::SYSTEM::CUSTOM_VARIABLES.each do |var|
       next if !YEA::SYSTEM::COMMANDS.include?(var[0])
       $game_variables[var[1][0]] = data[var[0]]
+    end
+    if YEA::SYSTEM::CUSTOM_LISTS != nil
+      YEA::SYSTEM::CUSTOM_LISTS.each do |var|
+        next if !YEA::SYSTEM::COMMANDS.include?(var[0])
+        $game_variables[var[1][0]] = data[var[0]]
+      end
     end
   end
 end #DataManager

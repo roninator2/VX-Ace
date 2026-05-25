@@ -1,0 +1,311 @@
+# ╔═══════════════════════════════════════════════╦════════════════════╗
+# ║ Title: Resource Gathering                     ║  Version: 1.00     ║
+# ║ Author: Roninator2                            ║                    ║
+# ╠═══════════════════════════════════════════════╬════════════════════╣
+# ║ Function:                                     ║   Date Created     ║
+# ║                                               ╠════════════════════╣
+# ║   Script Function                             ║    25 May 2026     ║
+# ╚═══════════════════════════════════════════════╩════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Requires: nil                                                      ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Brief Description:                                                 ║
+# ║       Mining, Forestry, Herbology, Fishing?                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Instructions:                                                      ║
+# ║  This is a System for gathering resources which you can            ║
+# ║    use to craft items or smith items or consume.                   ║
+# ║  Whatever you are able to use it for. Items only                   ║
+# ║                                                                    ║
+# ║  All values are in positives                                       ║
+# ║  A 75 for chance is 75%                                            ║
+# ║                                                                    ║
+# ║  Add the following in a script call in the event to perform the    ║
+# ║   mining/gathering task                                            ║
+# ║     # Events - Script call                                         ║
+# ║     <gather mine: mine, single, true, 21, 22, 25>                  ║
+# ║   This will specify the mining ability and list the items          ║
+# ║   that can be obtained.                                            ║
+# ║   Single refers to only gathering a single item                    ║
+# ║   Multi refers to gathering multiple item                          ║
+# ║     This is not multiple of the one item but multiple of           ║
+# ║     the items listed in teh script call (randomly selected)        ║
+# ║    <gather mine: fish, single, 41, 42, 45>                         ║
+# ║     gets a chance to receive either item 41, 42, or 45             ║
+# ║    <gather mine: herb, multi, 28, 29, 32>                          ║
+# ║     gets a chance to receive items 28, 29, and 32                  ║
+# ║   The true value is used to guarante the player gets an item       ║
+# ║                                                                    ║
+# ║  Add the following note tags in item database                      ║
+# ║    # Items - Note tags                                             ║
+# ║    <gather chance: 75>                                             ║
+# ║    This specifies the chance the item can be gathered/mined        ║
+# ║                                                                    ║
+# ║    <gather bonus: 50>                                              ║
+# ║    This specifies how much the actor's random chance above the     ║
+# ║    minimum required in order to gain extra material                ║
+# ║      i.e. chance = 75, ability = 35, bonus = 50, random roll = 75  ║
+# ║           chance 75 + ability 35 + random 75 = 185 - 100 = 85      ║
+# ║           final = (85 / 50) = 1 decimal blah blah                  ║
+# ║           player gets 1 of that item + 1 more = 2 items            ║
+# ║           if chance = 15, then final is 25. 25 / 50 = 0            ║
+# ║           if chance = 100 and ability = 100 then final = 175 = 3.5 ║
+# ║                                                                    ║
+# ║    <gather add: 25>                                                ║
+# ║    This specifies if the item is to provide a different value      ║
+# ║      for the gathering skill to improve. Default configured below  ║
+# ║    Maximum value for gathering skill is 100 by default             ║
+# ║                                                                    ║
+# ║  Add the following note tags in actor database                     ║
+# ║    # Actors                                                        ║
+# ║    <gather skill: mine:25>                                         ║
+# ║    This specifies if the actor starts with improved ability        ║
+# ║      Can be default skill or unique to the actor/ability           ║
+# ║                                                                    ║
+# ║    <gather max: mine:150>                                          ║
+# ║    This specifies if the actor gathering skill can go above 100    ║
+# ║                                                                    ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Updates:                                                           ║
+# ║ 1.00 - 25 May 2026 - Script finished                               ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Credits and Thanks:                                                ║
+# ║   Roninator2                                                       ║
+# ║                                                                    ║
+# ╚════════════════════════════════════════════════════════════════════╝
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║ Terms of use:                                                      ║
+# ║  Follow the original Authors terms of use where applicable         ║
+# ║    - When not made by me (Roninator2)                              ║
+# ║  Free for all uses in RPG Maker except nudity                      ║
+# ║  Anyone using this script in their project before these terms      ║
+# ║  were changed are allowed to use this script even if it conflicts  ║
+# ║  with these new terms. New terms effective 03 Apr 2024             ║
+# ║  No part of this code can be used with AI programs or tools        ║
+# ║  Credit must be given                                              ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+module R2_GATHERING
+  # System
+  DEFAULT_ADD = 2
+  ACTOR_GATHER_SKILLS = ["mine", "herb", "fish", "forest"] # default skills
+  FAIL_MESSAGE = "Nothing was obtained!"
+end
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║                      End of editable region                        ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+$imported = {} if $imported.nil?
+$imported[:r2_ghm] = 1.00          # Gather Harvest Mine
+
+module R2_GATHERING
+  # Event
+  GATHERING = /<gather[ -_]mine:(?:|[ ])(\w*),(?:|[ ])(\w*),(?:|[ ])(\w*),(?:|[ ])(\d+(?:\s*,\s*\d+)*)>/i
+  # Item
+  GATHER_CHANCE = /<gather[ -_]chance:(?:|[ ])(\d+)>/i
+  GATHER_BONUS = /<gather[ -_]bonus:(?:|[ ])(\d+)>/i
+  GATHER_ADD = /<gather[ -_]add:(?:|[ ])(\d+)>/i
+  # Actor
+  GATHER_SKILL = /<gather[ -_]skill:(?:|[ ])(\w+):(\d+)>/i
+  GATHER_MAX = /<gather[ -_]max:(?:|[ ])(\w+):(\d+)>/i
+end
+
+#==============================================================================
+# ■ DataManager
+#==============================================================================
+
+module DataManager
+  
+  #--------------------------------------------------------------------------
+  # alias method: load_database
+  #--------------------------------------------------------------------------
+  class <<self; alias load_database_gather load_database; end
+  def self.load_database
+    load_database_gather
+    load_notetags_gather
+  end
+  
+  #--------------------------------------------------------------------------
+  # new method: load_notetags_gather
+  #--------------------------------------------------------------------------
+  def self.load_notetags_gather
+    for obj in $data_items
+      next if obj.nil?
+      obj.load_notetags_gather
+    end
+  end
+  
+end # DataManager
+
+#==============================================================================
+# ■ RPG::Item
+#==============================================================================
+
+class RPG::Item
+  attr_reader :gather_chance
+  attr_reader :gather_bonus
+  attr_reader :gather_add
+  #--------------------------------------------------------------------------
+  # load_notetags_gather
+  #--------------------------------------------------------------------------
+  def load_notetags_gather
+    @gather_chance = 0
+    @gather_bonus = 0
+    @gather_add = R2_GATHERING::DEFAULT_ADD
+    self.note.split(/[\r\n]+/).each { |line|
+      case line
+      when R2_GATHERING::GATHER_CHANCE
+        @gather_chance = $1.to_i
+      when R2_GATHERING::GATHER_BONUS
+        @gather_bonus = $1.to_i
+      when R2_GATHERING::GATHER_ADD
+        @gather_add = $1.to_i
+      end
+    }
+  end
+ 
+end
+
+#==============================================================================
+# ** Game_Interpreter
+#==============================================================================
+
+class Game_Interpreter
+  #--------------------------------------------------------------------------
+  # * gather_mine(data)
+  #--------------------------------------------------------------------------
+  def gather_materials(*data)
+    gather_items = []
+    actor = $game_party.members[0]
+    gather_skill = data[0].to_sym
+    gather_multi = data[1].to_s
+    guarantee    = data[2].to_s.downcase == "true" ? true : false
+    ability = actor.gather_skills[gather_skill][0]
+    itsz = data.size - 3
+    max = actor.gather_max ? actor.gather_max : 100
+    itsz.times do |i| i+=3; gather_items << data[i]; end
+    if gather_multi.downcase == "single"
+      item = gather_items.sample
+      chance = $data_items[item].gather_chance
+      bonus = $data_items[item].gather_bonus
+      add = $data_items[item].gather_add.to_i
+      num = rand(100)
+      total = ability + chance + num - 100
+      if total > 0
+        amt = 1
+        if bonus != 0
+          bn = (one / bonus).to_i
+        else
+          bn = 0
+        end
+      else
+        amt = 0
+        amt = 1 if guarantee == true
+        bn = 0
+      end
+      if guarantee == true
+        $game_party.gain_item($data_items[item], amt+bn)
+        $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+        actor.gather_skills[gather_skill] += add
+      else
+        if amt > 0
+          $game_party.gain_item($data_items[item], 1)
+          $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+          actor.gather_skills[gather_skill] += add
+        elsif total >= num
+          $game_party.gain_item($data_items[item], 1)
+          $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+          actor.gather_skills[gather_skill] += add
+        else
+          $game_message.add(R2_GATHERING::FAIL_MESSAGE)
+          actor.gather_skills[gather_skill] += 1
+        end
+      end
+    else
+      success = false
+      gather_items.each do |item|
+        next if item.nil?
+        chance = $data_items[item].gather_chance
+        bonus = $data_items[item].gather_bonus
+        add = $data_items[item].gather_add
+        num = rand(100)
+        total = ability + chance + num - 100
+        if total > 0
+          amt = 1
+          if bonus != 0
+            bn = (one / bonus).to_i
+          else
+            bn = 0
+          end
+        else
+          amt = 0
+          amt = 1 if guarantee == true
+          bn = 0
+        end
+        if guarantee == true
+          $game_party.gain_item($data_items[item], amt+bn)
+          $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+          actor.gather_skills[gather_skill] += add
+          success = true
+        else
+          if amt > 0
+            $game_party.gain_item($data_items[item], 1)
+            actor.gather_skills[gather_skill] += add
+            $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+            success = true
+          elsif total >= num
+            $game_party.gain_item($data_items[item], 1)
+            actor.gather_skills[gather_skill] += add
+            $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+            success = true
+          else
+            $game_message.add(R2_GATHERING::FAIL_MESSAGE)
+          end
+        end
+      end
+      if success == false
+        actor.gather_skills[gather_skill] += 1
+      end
+    end
+    if actor.gather_skills[gather_skill] > actor.gather_max[gather_skill]
+      actor.gather_skills[gather_skill] = actor.gather_max[gather_skill]
+    end
+  end
+  
+end
+
+class Game_Actor
+  attr_accessor :gather_skills
+  attr_reader   :gather_max
+  
+  #--------------------------------------------------------------------------
+  # * Setup
+  #--------------------------------------------------------------------------
+  alias r2_setup_actor_gathering_skills setup
+  def setup(actor_id)
+    r2_setup_actor_gathering_skills(actor_id)
+    load_notetags_actor_gather(actor_id)
+  end
+
+  def load_notetags_actor_gather(actor_id)
+    @gather_skills = {}
+    @gather_max = {}
+    R2_GATHERING::ACTOR_GATHER_SKILLS.each { |sk| @gather_skills[sk.to_sym] = 0; @gather_max[sk.to_sym] = 100 }
+    $data_actors[actor_id].note.split(/[\r\n]+/).each { |line|
+      case line
+      when R2_GATHERING::GATHER_SKILL
+        @gather_skills[$1.to_sym] = $2.to_i
+      when R2_GATHERING::GATHER_MAX
+        @gather_max[$1.to_sym] = $2.to_i
+      end
+    }
+  end
+end
+

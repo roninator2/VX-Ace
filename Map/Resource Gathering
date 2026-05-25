@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Resource Gathering                     ║  Version: 1.00     ║
+# ║ Title: Resource Gathering                     ║  Version: 1.01     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -54,18 +54,18 @@
 # ║           if chance = 15, then final is 25. 25 / 50 = 0            ║
 # ║           if chance = 100 and ability = 100 then final = 175 = 3.5 ║
 # ║                                                                    ║
-# ║    <gather add: 25>                                                ║
+# ║    <gather add: 0.25>                                              ║
 # ║    This specifies if the item is to provide a different value      ║
 # ║      for the gathering skill to improve. Default configured below  ║
 # ║    Maximum value for gathering skill is 100 by default             ║
 # ║                                                                    ║
 # ║  Add the following note tags in actor database                     ║
 # ║    # Actors                                                        ║
-# ║    <gather skill: mine:25>                                         ║
+# ║    <gather skill: mine:25.00>                                      ║
 # ║    This specifies if the actor starts with improved ability        ║
 # ║      Can be default skill or unique to the actor/ability           ║
 # ║                                                                    ║
-# ║    <gather max: mine:150>                                          ║
+# ║    <gather max: mine:150.00>                                       ║
 # ║    This specifies if the actor gathering skill can go above 100    ║
 # ║                                                                    ║
 # ║                                                                    ║
@@ -73,7 +73,7 @@
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Updates:                                                           ║
 # ║ 1.00 - 25 May 2026 - Script finished                               ║
-# ║                                                                    ║
+# ║ 1.01 - 26 May 2026 - adjusted ability points to gain much slower   ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -94,7 +94,7 @@
 
 module R2_GATHERING
   # System
-  DEFAULT_ADD = 2
+  DEFAULT_ADD = 0.02
   ACTOR_GATHER_SKILLS = ["mine", "herb", "fish", "forest"] # default skills
   FAIL_MESSAGE = "Nothing was obtained!"
 end
@@ -123,18 +123,12 @@ end
 
 module DataManager
   
-  #--------------------------------------------------------------------------
-  # alias method: load_database
-  #--------------------------------------------------------------------------
   class <<self; alias load_database_gather load_database; end
   def self.load_database
     load_database_gather
     load_notetags_gather
   end
   
-  #--------------------------------------------------------------------------
-  # new method: load_notetags_gather
-  #--------------------------------------------------------------------------
   def self.load_notetags_gather
     for obj in $data_items
       next if obj.nil?
@@ -152,9 +146,7 @@ class RPG::Item
   attr_reader :gather_chance
   attr_reader :gather_bonus
   attr_reader :gather_add
-  #--------------------------------------------------------------------------
-  # load_notetags_gather
-  #--------------------------------------------------------------------------
+
   def load_notetags_gather
     @gather_chance = 0
     @gather_bonus = 0
@@ -166,11 +158,35 @@ class RPG::Item
       when R2_GATHERING::GATHER_BONUS
         @gather_bonus = $1.to_i
       when R2_GATHERING::GATHER_ADD
-        @gather_add = $1.to_i
+        @gather_add = $1.to_f.round(2)
       end
     }
   end
- 
+end
+
+class Game_Actor
+  attr_accessor :gather_skills
+  attr_reader   :gather_max
+  
+  alias r2_setup_actor_gathering_skills setup
+  def setup(actor_id)
+    r2_setup_actor_gathering_skills(actor_id)
+    load_notetags_actor_gather(actor_id)
+  end
+
+  def load_notetags_actor_gather(actor_id)
+    @gather_skills = {}
+    @gather_max = {}
+    R2_GATHERING::ACTOR_GATHER_SKILLS.each { |sk| @gather_skills[sk.to_sym] = 0; @gather_max[sk.to_sym] = 100 }
+    $data_actors[actor_id].note.split(/[\r\n]+/).each { |line|
+      case line
+      when R2_GATHERING::GATHER_SKILL
+        @gather_skills[$1.to_sym] = $2.to_f.round(2)
+      when R2_GATHERING::GATHER_MAX
+        @gather_max[$1.to_sym] = $2.to_f.round(2)
+      end
+    }
+  end
 end
 
 #==============================================================================
@@ -187,17 +203,17 @@ class Game_Interpreter
     gather_skill = data[0].to_sym
     gather_multi = data[1].to_s
     guarantee    = data[2].to_s.downcase == "true" ? true : false
-    ability = actor.gather_skills[gather_skill][0]
+    ability = actor.gather_skills[gather_skill].to_f.round(2)
     itsz = data.size - 3
     max = actor.gather_max ? actor.gather_max : 100
     itsz.times do |i| i+=3; gather_items << data[i]; end
     if gather_multi.downcase == "single"
       item = gather_items.sample
-      chance = $data_items[item].gather_chance
-      bonus = $data_items[item].gather_bonus
-      add = $data_items[item].gather_add.to_i
-      num = rand(100)
-      total = ability + chance + num - 100
+      chance = $data_items[item].gather_chance.to_i
+      bonus = $data_items[item].gather_bonus.to_i
+      add = $data_items[item].gather_add.to_f.round(2)
+      num = rand(100).to_i
+      total = (ability + chance + num - 100).to_i
       if total > 0
         amt = 1
         if bonus != 0
@@ -225,18 +241,19 @@ class Game_Interpreter
           actor.gather_skills[gather_skill] += add
         else
           $game_message.add(R2_GATHERING::FAIL_MESSAGE)
-          actor.gather_skills[gather_skill] += 1
+          actor.gather_skills[gather_skill] += 0.01
         end
       end
+      actor.gather_skills[gather_skill] = actor.gather_skills[gather_skill].to_f.round(2)
     else
-      success = false
       gather_items.each do |item|
+        success = false
         next if item.nil?
-        chance = $data_items[item].gather_chance
-        bonus = $data_items[item].gather_bonus
-        add = $data_items[item].gather_add
-        num = rand(100)
-        total = ability + chance + num - 100
+        chance = $data_items[item].gather_chance.to_i
+        bonus = $data_items[item].gather_bonus.to_i
+        add = $data_items[item].gather_add.to_f.round(2)
+        num = rand(100).to_i
+        total = (ability + chance + num - 100).to_i
         if total > 0
           amt = 1
           if bonus != 0
@@ -269,43 +286,15 @@ class Game_Interpreter
             $game_message.add(R2_GATHERING::FAIL_MESSAGE)
           end
         end
+        if success == false
+          actor.gather_skills[gather_skill] += 0.01
+        end
       end
-      if success == false
-        actor.gather_skills[gather_skill] += 1
-      end
+      actor.gather_skills[gather_skill] = actor.gather_skills[gather_skill].to_f.round(2)
     end
     if actor.gather_skills[gather_skill] > actor.gather_max[gather_skill]
-      actor.gather_skills[gather_skill] = actor.gather_max[gather_skill]
+      actor.gather_skills[gather_skill] = actor.gather_max[gather_skill].to_f.round(2)
     end
   end
   
 end
-
-class Game_Actor
-  attr_accessor :gather_skills
-  attr_reader   :gather_max
-  
-  #--------------------------------------------------------------------------
-  # * Setup
-  #--------------------------------------------------------------------------
-  alias r2_setup_actor_gathering_skills setup
-  def setup(actor_id)
-    r2_setup_actor_gathering_skills(actor_id)
-    load_notetags_actor_gather(actor_id)
-  end
-
-  def load_notetags_actor_gather(actor_id)
-    @gather_skills = {}
-    @gather_max = {}
-    R2_GATHERING::ACTOR_GATHER_SKILLS.each { |sk| @gather_skills[sk.to_sym] = 0; @gather_max[sk.to_sym] = 100 }
-    $data_actors[actor_id].note.split(/[\r\n]+/).each { |line|
-      case line
-      when R2_GATHERING::GATHER_SKILL
-        @gather_skills[$1.to_sym] = $2.to_i
-      when R2_GATHERING::GATHER_MAX
-        @gather_max[$1.to_sym] = $2.to_i
-      end
-    }
-  end
-end
-

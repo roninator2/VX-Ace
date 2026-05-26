@@ -32,10 +32,10 @@
 # ║   Single refers to only gathering a single item                    ║
 # ║   Multi refers to gathering multiple item                          ║
 # ║     This is not multiple of the one item but multiple of           ║
-# ║     the items listed in teh script call (randomly selected)        ║
-# ║    <gather mine: fish, single, 41, 42, 45>                         ║
+# ║     the items listed in the script call (randomly selected)        ║
+# ║    <gather mine: fish, single, true, 41, 42, 45>                   ║
 # ║     gets a chance to receive either item 41, 42, or 45             ║
-# ║    <gather mine: herb, multi, 28, 29, 32>                          ║
+# ║    <gather mine: herb, multi, true, 28, 29, 32>                    ║
 # ║     gets a chance to receive items 28, 29, and 32                  ║
 # ║   The true value is used to guarante the player gets an item       ║
 # ║                                                                    ║

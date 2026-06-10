@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════╦════════════════════╗
-# ║ Title: Resource Gathering                     ║  Version: 1.01     ║
+# ║ Title: Resource Gathering                     ║  Version: 1.02     ║
 # ║ Author: Roninator2                            ║                    ║
 # ╠═══════════════════════════════════════════════╬════════════════════╣
 # ║ Function:                                     ║   Date Created     ║
@@ -32,10 +32,10 @@
 # ║   Single refers to only gathering a single item                    ║
 # ║   Multi refers to gathering multiple item                          ║
 # ║     This is not multiple of the one item but multiple of           ║
-# ║     the items listed in the script call (randomly selected)        ║
-# ║    <gather mine: fish, single, true, 41, 42, 45>                   ║
+# ║     the items listed in teh script call (randomly selected)        ║
+# ║    <gather mine: fish, single, 41, 42, 45>                         ║
 # ║     gets a chance to receive either item 41, 42, or 45             ║
-# ║    <gather mine: herb, multi, true, 28, 29, 32>                    ║
+# ║    <gather mine: herb, multi, 28, 29, 32>                          ║
 # ║     gets a chance to receive items 28, 29, and 32                  ║
 # ║   The true value is used to guarante the player gets an item       ║
 # ║                                                                    ║
@@ -74,6 +74,7 @@
 # ║ Updates:                                                           ║
 # ║ 1.00 - 25 May 2026 - Script finished                               ║
 # ║ 1.01 - 26 May 2026 - adjusted ability points to gain much slower   ║
+# ║ 1.02 - 09 Jun 2026 - Corrected missing multi add and message       ║
 # ╚════════════════════════════════════════════════════════════════════╝
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║ Credits and Thanks:                                                ║
@@ -97,13 +98,15 @@ module R2_GATHERING
   DEFAULT_ADD = 0.02
   ACTOR_GATHER_SKILLS = ["mine", "herb", "fish", "forest"] # default skills
   FAIL_MESSAGE = "Nothing was obtained!"
+  FOUND_MSG = "Found" # message will be "Found (number) (items)
+  # I.E. Found 2 Sticks!
 end
 # ╔════════════════════════════════════════════════════════════════════╗
 # ║                      End of editable region                        ║
 # ╚════════════════════════════════════════════════════════════════════╝
 
 $imported = {} if $imported.nil?
-$imported[:r2_ghm] = 1.00          # Gather Harvest Mine
+$imported[:r2_ghm] = 1.02          # Gather Harvest Mine
 
 module R2_GATHERING
   # Event
@@ -115,6 +118,10 @@ module R2_GATHERING
   # Actor
   GATHER_SKILL = /<gather[ -_]skill:(?:|[ ])(\w+):(\d+)>/i
   GATHER_MAX = /<gather[ -_]max:(?:|[ ])(\w+):(\d+)>/i
+end
+
+module Vocab
+  GatherItem      = "#{R2_GATHERING::FOUND_MSG} %s %s!"
 end
 
 #==============================================================================
@@ -217,7 +224,7 @@ class Game_Interpreter
       if total > 0
         amt = 1
         if bonus != 0
-          bn = (one / bonus).to_i
+          bn = (total / bonus).to_i
         else
           bn = 0
         end
@@ -228,16 +235,16 @@ class Game_Interpreter
       end
       if guarantee == true
         $game_party.gain_item($data_items[item], amt+bn)
-        $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+        $game_message.add(sprintf(Vocab::GatherItem, amt+bn, $data_items[item].name))
         actor.gather_skills[gather_skill] += add
       else
         if amt > 0
           $game_party.gain_item($data_items[item], 1)
-          $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+          $game_message.add(sprintf(Vocab::GatherItem, 1, $data_items[item].name))
           actor.gather_skills[gather_skill] += add
         elsif total >= num
           $game_party.gain_item($data_items[item], 1)
-          $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+          $game_message.add(sprintf(Vocab::GatherItem, 1, $data_items[item].name))
           actor.gather_skills[gather_skill] += add
         else
           $game_message.add(R2_GATHERING::FAIL_MESSAGE)
@@ -257,7 +264,7 @@ class Game_Interpreter
         if total > 0
           amt = 1
           if bonus != 0
-            bn = (one / bonus).to_i
+            bn = (total / bonus).to_i
           else
             bn = 0
           end
@@ -268,19 +275,19 @@ class Game_Interpreter
         end
         if guarantee == true
           $game_party.gain_item($data_items[item], amt+bn)
-          $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+          $game_message.add(sprintf(Vocab::GatherItem, amt+bn, $data_items[item].name))
           actor.gather_skills[gather_skill] += add
           success = true
         else
           if amt > 0
-            $game_party.gain_item($data_items[item], 1)
+            $game_party.gain_item($data_items[item], amt+bn)
             actor.gather_skills[gather_skill] += add
-            $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+            $game_message.add(sprintf(Vocab::GatherItem, amt+bn, $data_items[item].name))
             success = true
           elsif total >= num
             $game_party.gain_item($data_items[item], 1)
             actor.gather_skills[gather_skill] += add
-            $game_message.add(sprintf(Vocab::ObtainItem, $data_items[item].name))
+            $game_message.add(sprintf(Vocab::GatherItem, 1, $data_items[item].name))
             success = true
           else
             $game_message.add(R2_GATHERING::FAIL_MESSAGE)

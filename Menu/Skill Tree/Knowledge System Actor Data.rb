@@ -39,6 +39,9 @@
 # ║  Credit must be given                                              ║
 # ╚════════════════════════════════════════════════════════════════════╝
 
+$imported = {} if $imported.nil?
+$imported[:r2_kad] = 1.00          # Knowledge Actor Data
+
 module R2_Knowledge_Menu
   module Actor_Data
     # Actor's Skill Shop Database

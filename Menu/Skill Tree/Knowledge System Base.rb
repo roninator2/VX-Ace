@@ -63,6 +63,9 @@
 # ║  Credit must be given                                              ║
 # ╚════════════════════════════════════════════════════════════════════╝
 
+$imported = {} if $imported.nil?
+$imported[:r2_kmb] = 1.00          # Knowledge Menu Base
+
 module R2_Knowledge_Menu
   
   # Main Menu command name for skills

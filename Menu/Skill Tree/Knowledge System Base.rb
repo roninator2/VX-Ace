@@ -598,20 +598,20 @@ class Window_Knowledge_Actor < Window_ItemList
     case val
     when 0 # left to right
       change_color(system_color)
-      draw_text(0, 8, 120, line_height, word1)
-      draw_text(0, 72, 120, line_height, word2)
-      draw_text(0, 136, 120, line_height, word3)
-      draw_text(0, 200, 120, line_height, word4)
-      draw_text(0, 264, 120, line_height, word5)
+      draw_text(0, 8, 120, line_height, word1) if @col1 > 0
+      draw_text(0, 72, 120, line_height, word2) if @col2 > 0
+      draw_text(0, 136, 120, line_height, word3) if @col3 > 0
+      draw_text(0, 200, 120, line_height, word4) if @col4 > 0
+      draw_text(0, 264, 120, line_height, word5) if @col5 > 0
       change_color(normal_color)
       item_max.times {|i| draw_item(i) }
     when 1 # Top to bottom
       change_color(system_color)
-      draw_text(0, 0, 120, line_height, word1)
-      draw_text(90, 0, 120, line_height, word2)
-      draw_text(180, 0, 120, line_height, word3)
-      draw_text(260, 0, 120, line_height, word4)
-      draw_text(350, 0, 120, line_height, word5)
+      draw_text(0, 0, 120, line_height, word1) if @col1 > 0
+      draw_text(90, 0, 120, line_height, word2) if @col2 > 0
+      draw_text(180, 0, 120, line_height, word3) if @col3 > 0
+      draw_text(260, 0, 120, line_height, word4) if @col4 > 0
+      draw_text(350, 0, 120, line_height, word5) if @col5 > 0
       change_color(normal_color)
       item_max.times {|i| draw_item(i) }
     when 2 # 4 groups
